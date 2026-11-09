@@ -28,3 +28,51 @@ Content-Type: application/json
   "documentoIdentidad": "99999999",
   "correoElectronico": "correo-invalido"
 }
+### ==========================================
+### CAPÍTULO 07: PRUEBAS DE VEHÍCULO (1:N)
+### ==========================================
+
+### 6. Listar todos los vehículos existentes
+GET http://localhost:8080/vehiculo
+
+### 7. Registrar vehículo válido asociado a Carlos Mendoza (clienteId = 1) -> 201 Created
+POST http://localhost:8080/vehiculo
+Content-Type: application/json
+
+{
+  "clienteId": 1,
+  "placa": "3040XYZ",
+  "tipo": "AUTO",
+  "marca": "Toyota",
+  "modelo": "Corolla",
+  "color": "Plateado"
+}
+
+### 8. Consultar vehículo por ID
+GET http://localhost:8080/vehiculo/1
+
+### 9. Listar vehículos asociados al Cliente 1
+GET http://localhost:8080/vehiculo/cliente/1
+
+### 10. Intentar registrar vehículo con cliente inexistente (clienteId = 999) -> Error esperado
+POST http://localhost:8080/vehiculo
+Content-Type: application/json
+
+{
+  "clienteId": 999,
+  "placa": "9999NOP",
+  "tipo": "SUV",
+  "marca": "Ford",
+  "modelo": "Explorer",
+  "color": "Negro"
+}
+
+### 11. Intentar registrar placa duplicada -> Error esperado
+POST http://localhost:8080/vehiculo
+Content-Type: application/json
+
+{
+  "clienteId": 1,
+  "placa": "3040XYZ",
+  "tipo": "AUTO"
+}
