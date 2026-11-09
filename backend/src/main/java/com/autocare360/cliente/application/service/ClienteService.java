@@ -6,6 +6,7 @@ import com.autocare360.cliente.domain.port.in.ConsultarClienteUseCase;
 import com.autocare360.cliente.domain.port.in.RegistrarClienteUseCase;
 import com.autocare360.cliente.domain.port.out.ClienteRepositoryPort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,8 +21,8 @@ public class ClienteService implements RegistrarClienteUseCase, ConsultarCliente
     }
 
     @Override
+    @Transactional
     public Cliente registrar(Cliente cliente) {
-        // Regla de negocio que protege la restricción UNIQUE de PostgreSQL
         if (repositoryPort.existePorDocumentoIdentidad(cliente.getDocumentoIdentidad())) {
             throw new ClienteDuplicadoException("Ya existe un cliente con documento: " + cliente.getDocumentoIdentidad());
         }
@@ -29,11 +30,13 @@ public class ClienteService implements RegistrarClienteUseCase, ConsultarCliente
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Cliente> buscarPorId(Long id) {
         return repositoryPort.buscarPorId(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Cliente> listarTodos(String buscar) {
         return repositoryPort.listarTodos(buscar);
     }

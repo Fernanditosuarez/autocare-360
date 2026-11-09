@@ -76,3 +76,52 @@ Content-Type: application/json
   "placa": "3040XYZ",
   "tipo": "AUTO"
 }
+### ===================================================
+### CAPÍTULO 08: SUITE DE PRUEBAS DE ERRORES Y ESTADOS
+### ===================================================
+
+### Caso 1: Registro válido -> 201 Created
+POST http://localhost:8080/vehiculo
+Content-Type: application/json
+
+{
+  "clienteId": 1,
+  "placa": "4455ABC",
+  "tipo": "AUTO",
+  "marca": "Suzuki",
+  "modelo": "Swift",
+  "color": "Rojo"
+}
+
+### Caso 2: Formato inválido -> 400 Bad Request (devuelve fieldErrors)
+POST http://localhost:8080/vehiculo
+Content-Type: application/json
+
+{
+  "clienteId": null,
+  "placa": "",
+  "tipo": null
+}
+
+### Caso 3: Padre inexistente -> 404 Not Found
+POST http://localhost:8080/vehiculo
+Content-Type: application/json
+
+{
+  "clienteId": 9999,
+  "placa": "8899XYZ",
+  "tipo": "SUV",
+  "marca": "Toyota",
+  "modelo": "RAV4",
+  "color": "Gris"
+}
+
+### Caso 4: Regla de conflicto (Placa duplicada) -> 409 Conflict
+POST http://localhost:8080/vehiculo
+Content-Type: application/json
+
+{
+  "clienteId": 1,
+  "placa": "4455ABC",
+  "tipo": "AUTO"
+}
