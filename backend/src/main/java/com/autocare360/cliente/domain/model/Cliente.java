@@ -1,5 +1,10 @@
 package com.autocare360.cliente.domain.model;
 
+import com.autocare360.vehiculo.domain.model.Vehiculo;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class Cliente {
 
     private final Long clienteId;
@@ -9,6 +14,9 @@ public class Cliente {
     private final String telefono;
     private final String direccion;
 
+    // Relación 1:N en memoria encapsulada
+    private final List<Vehiculo> vehiculos = new ArrayList<>();
+
     public Cliente(Long clienteId, String nombreCompleto, String documentoIdentidad,
                    String correoElectronico, String telefono, String direccion) {
         this.clienteId = clienteId;
@@ -17,6 +25,18 @@ public class Cliente {
         this.correoElectronico = correoElectronico;
         this.telefono = telefono;
         this.direccion = direccion;
+    }
+
+    // Método de negocio para asociar un vehículo al cliente
+    public void agregarVehiculo(Vehiculo vehiculo) {
+        if (vehiculo == null) {
+            throw new IllegalArgumentException("No se puede agregar un vehiculo nulo.");
+        }
+        this.vehiculos.add(vehiculo);
+    }
+
+    public List<Vehiculo> getVehiculos() {
+        return Collections.unmodifiableList(vehiculos);
     }
 
     public Long getClienteId() {
@@ -41,5 +61,14 @@ public class Cliente {
 
     public String getDireccion() {
         return direccion;
+    }
+
+    @Override
+    public String toString() {
+        return "Cliente{" +
+                "clienteId=" + clienteId +
+                ", nombreCompleto='" + nombreCompleto + '\'' +
+                ", vehiculos=" + vehiculos.size() +
+                '}';
     }
 }
