@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/autocare360
+    username: postgres
+    password: brunosuarez
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate   # ¡Regla obligatoria de la guía! Valida contra las tablas ya creadas
+    properties:
+      hibernate:
+        default_schema: public
+        format_sql: true
+    open-in-view: false
+
+logging:
+  level:
+    org.hibernate.SQL: debug
