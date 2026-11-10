@@ -1,37 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import ClienteForm from '../components/ClienteForm';
 import ClienteTable from '../components/ClienteTable';
+import { useClientes } from '../hooks/useClientes';
 import { clienteService } from '../services/clienteService';
 import type { Cliente } from '../types/Cliente';
 
 export default function ClientesPage() {
-    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const { data: clientes, setData: setClientes, loading, error, setError } = useClientes();
     const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
-    const [loading, setLoading] = useState(true);
     const [loadingDetail, setLoadingDetail] = useState(false);
     const [deletingId, setDeletingId] = useState<number | null>(null);
-    const [error, setError] = useState('');
     const [mostrarForm, setMostrarForm] = useState(false);
-
-    const cargarClientes = async (signal?: AbortSignal) => {
-        try {
-            setLoading(true);
-            setError('');
-            const data = await clienteService.listar(signal);
-            setClientes(data);
-        } catch (err) {
-            if (err instanceof DOMException && err.name === 'AbortError') return;
-            setError(err instanceof Error ? err.message : 'Error al listar clientes');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        const controller = new AbortController();
-        cargarClientes(controller.signal);
-        return () => controller.abort();
-    }, []);
 
     const handleEdit = async (id: number) => {
         try {
@@ -81,9 +60,9 @@ export default function ClientesPage() {
         <section>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <div>
-                    <h2 style={{ margin: 0, color: '#0f172a' }}>Gestión de Clientes (CRUD Completo)</h2>
+                    <h2 style={{ margin: 0, color: '#0f172a' }}>Gestión de Clientes (Refactorizado con Custom Hooks)</h2>
                     <p style={{ margin: '0.25rem 0 0', color: '#64748b', fontSize: '0.875rem' }}>
-                        Operaciones GET, POST, PUT y DELETE conectadas directamente a Spring Boot / PostgreSQL ({clientes.length})
+                        Listado controlado mediante `useClientes` ({clientes.length} registrados)
                     </p>
                 </div>
                 <button

@@ -1,55 +1,33 @@
-import { useEffect, useState } from 'react';
-import { clienteService } from '../../clientes/services/clienteService';
-import type { Cliente } from '../../clientes/types/Cliente';
+import { useState } from 'react';
+import { useClientes } from '../../clientes/hooks/useClientes';
 import VehiculoForm from '../components/VehiculoForm';
 import VehiculoTable from '../components/VehiculoTable';
+import { useVehiculos } from '../hooks/useVehiculos';
 import { vehiculoService } from '../services/vehiculoService';
 import type { Vehiculo } from '../types/Vehiculo';
 
 export default function VehiculosPage() {
-    const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
-    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const { data: vehiculos, setData: setVehiculos, loading: loadingVehiculos, error: errorVehiculos, setError: setErrorVehiculos } = useVehiculos();
+    const { data: clientes, loading: loadingClientes, error: errorClientes } = useClientes();
+
     const [editingVehiculo, setEditingVehiculo] = useState<Vehiculo | null>(null);
-    const [loading, setLoading] = useState(true);
     const [loadingDetail, setLoadingDetail] = useState(false);
     const [deletingId, setDeletingId] = useState<number | null>(null);
-    const [error, setError] = useState('');
     const [mostrarForm, setMostrarForm] = useState(false);
     const [clienteFiltro, setClienteFiltro] = useState<string>('');
 
-    const cargarDatos = async (signal?: AbortSignal) => {
-        try {
-            setLoading(true);
-            setError('');
-            const [listaVehiculos, listaClientes] = await Promise.all([
-                vehiculoService.listar(signal),
-                clienteService.listar(signal),
-            ]);
-            setVehiculos(listaVehiculos);
-            setClientes(listaClientes);
-        } catch (err) {
-            if (err instanceof DOMException && err.name === 'AbortError') return;
-            setError(err instanceof Error ? err.message : 'Error al conectar con la API');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        const controller = new AbortController();
-        cargarDatos(controller.signal);
-        return () => controller.abort();
-    }, []);
+    const loading = loadingVehiculos || loadingClientes;
+    const error = errorVehiculos || errorClientes;
 
     const handleEdit = async (id: number) => {
         try {
             setLoadingDetail(true);
-            setError('');
+            setErrorVehiculos('');
             const vehiculo = await vehiculoService.obtenerPorId(id);
             setEditingVehiculo(vehiculo);
             setMostrarForm(true);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'No se pudo cargar el detalle del vehículo');
+            setErrorVehiculos(err instanceof Error ? err.message : 'No se pudo cargar el detalle del vehículo');
         } finally {
             setLoadingDetail(false);
         }
@@ -71,7 +49,7 @@ export default function VehiculosPage() {
 
         try {
             setDeletingId(vehiculo.vehiculoId);
-            setError('');
+            setErrorVehiculos('');
             await vehiculoService.eliminar(vehiculo.vehiculoId);
             setVehiculos((prev) => prev.filter((v) => v.vehiculoId !== vehiculo.vehiculoId));
             if (editingVehiculo?.vehiculoId === vehiculo.vehiculoId) {
@@ -79,12 +57,13 @@ export default function VehiculosPage() {
                 setMostrarForm(false);
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'No se pudo eliminar el vehículo');
+            setErrorVehiculos(err instanceof Error ? err.message : 'No se pudo eliminar el vehículo');
         } finally {
             setDeletingId(null);
         }
     };
 
+    // Estado derivado: se calcula directamente en render sin duplicar datos en un useState
     const vehiculosFiltrados = clienteFiltro
         ? vehiculos.filter((v) => v.clienteId === Number(clienteFiltro))
         : vehiculos;
@@ -93,9 +72,9 @@ export default function VehiculosPage() {
         <section>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <div>
-                    <h2 style={{ margin: 0, color: '#0f172a' }}>Gestión de Vehículos (CRUD + Relación 1:N)</h2>
+                    <h2 style={{ margin: 0, color: '#0f172a' }}>Gestión de Vehículos (Refactorizado con Custom Hooks)</h2>
                     <p style={{ margin: '0.25rem 0 0', color: '#64748b', fontSize: '0.875rem' }}>
-                        Control de unidades conectadas a Spring Boot / PostgreSQL ({vehiculos.length} registradas)
+                        Listado controlado mediante `useVehiculos` ({vehiculos.length} registrados)
                     </p>
                 </div>
                 <button
@@ -141,7 +120,7 @@ export default function VehiculosPage() {
             )}
 
             {loading ? (
-                <div style={{ padding: '1.5rem', textAlign: 'center', color: '#64748b' }}>Cargando vehículos desde Spring Boot...</div>
+                <div style={{ padding: '1.5rem', textAlign: 'center', color: '#64748b' }}>Cargando datos...</div>
             ) : (
                 <VehiculoTable
                     vehiculos={vehiculosFiltrados}
