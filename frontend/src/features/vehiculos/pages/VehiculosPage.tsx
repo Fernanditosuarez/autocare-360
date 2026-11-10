@@ -1,110 +1,148 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useClientes } from '../../clientes/hooks/useClientes';
+import { Button } from '../../../components/ui/Button';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { Pagination } from '../../../components/ui/Pagination';
+import { SearchInput } from '../../../components/ui/SearchInput';
+import { SelectFilter } from '../../../components/ui/SelectFilter';
+
 import VehiculoForm from '../components/VehiculoForm';
 import VehiculoTable from '../components/VehiculoTable';
 import { useVehiculos } from '../hooks/useVehiculos';
 import { vehiculoService } from '../services/vehiculoService';
 import type { Vehiculo } from '../types/Vehiculo';
 
+const PAGE_SIZE = 5;
+
 export default function VehiculosPage() {
     const { data: vehiculos, setData: setVehiculos, loading: loadingVehiculos, error: errorVehiculos, setError: setErrorVehiculos } = useVehiculos();
     const { data: clientes, loading: loadingClientes, error: errorClientes } = useClientes();
 
+    const [search, setSearch] = useState('');
+    const [clienteFiltro, setClienteFiltro] = useState('');
+    const [tipoFiltro, setTipoFiltro] = useState('');
+    const [page, setPage] = useState(1);
     const [editingVehiculo, setEditingVehiculo] = useState<Vehiculo | null>(null);
-    const [loadingDetail, setLoadingDetail] = useState(false);
-    const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [pendingDelete, setPendingDelete] = useState<Vehiculo | null>(null);
+    const [deleting, setDeleting] = useState(false);
     const [mostrarForm, setMostrarForm] = useState(false);
-    const [clienteFiltro, setClienteFiltro] = useState<string>('');
 
     const loading = loadingVehiculos || loadingClientes;
     const error = errorVehiculos || errorClientes;
 
+    useEffect(() => {
+        setPage(1);
+    }, [search, clienteFiltro, tipoFiltro]);
+
+    const clienteMap = new Map(clientes.map((c) => [c.clienteId, c]));
+
+    // Filtrado compuesto
+    const vehiculosFiltrados = vehiculos.filter((v) => {
+        const term = search.trim().toLowerCase();
+        const propietario = clienteMap.get(v.clienteId);
+        const nombrePropietario = propietario ? propietario.nombreCompleto.toLowerCase() : '';
+
+        const matchesText =
+            !term ||
+            v.placa.toLowerCase().includes(term) ||
+            (v.marca && v.marca.toLowerCase().includes(term)) ||
+            (v.modelo && v.modelo.toLowerCase().includes(term)) ||
+            nombrePropietario.includes(term);
+
+        const matchesCliente = !clienteFiltro || v.clienteId === Number(clienteFiltro);
+        const matchesTipo = !tipoFiltro || v.tipo === tipoFiltro;
+
+        return matchesText && matchesCliente && matchesTipo;
+    });
+
+    const totalPages = Math.max(1, Math.ceil(vehiculosFiltrados.length / PAGE_SIZE));
+    const visibleVehiculos = vehiculosFiltrados.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
     const handleEdit = async (id: number) => {
         try {
-            setLoadingDetail(true);
             setErrorVehiculos('');
             const vehiculo = await vehiculoService.obtenerPorId(id);
             setEditingVehiculo(vehiculo);
             setMostrarForm(true);
         } catch (err) {
-            setErrorVehiculos(err instanceof Error ? err.message : 'No se pudo cargar el detalle del vehículo');
-        } finally {
-            setLoadingDetail(false);
+            setErrorVehiculos(err instanceof Error ? err.message : 'Error al cargar el detalle del vehículo');
         }
     };
 
-    const handleSaved = (saved: Vehiculo, mode: 'create' | 'edit') => {
-        setVehiculos((prev) =>
-            mode === 'create'
-                ? [...prev, saved]
-                : prev.map((item) => (item.vehiculoId === saved.vehiculoId ? saved : item))
-        );
-        setEditingVehiculo(null);
-        setMostrarForm(false);
-    };
-
-    const handleDelete = async (vehiculo: Vehiculo) => {
-        const confirmado = window.confirm(`¿Está seguro de eliminar el vehículo con placa "${vehiculo.placa}"?`);
-        if (!confirmado) return;
-
+    const handleConfirmDelete = async () => {
+        if (!pendingDelete) return;
         try {
-            setDeletingId(vehiculo.vehiculoId);
+            setDeleting(true);
             setErrorVehiculos('');
-            await vehiculoService.eliminar(vehiculo.vehiculoId);
-            setVehiculos((prev) => prev.filter((v) => v.vehiculoId !== vehiculo.vehiculoId));
-            if (editingVehiculo?.vehiculoId === vehiculo.vehiculoId) {
+            await vehiculoService.eliminar(pendingDelete.vehiculoId);
+            setVehiculos((prev) => prev.filter((v) => v.vehiculoId !== pendingDelete.vehiculoId));
+            if (editingVehiculo?.vehiculoId === pendingDelete.vehiculoId) {
                 setEditingVehiculo(null);
                 setMostrarForm(false);
             }
         } catch (err) {
             setErrorVehiculos(err instanceof Error ? err.message : 'No se pudo eliminar el vehículo');
         } finally {
-            setDeletingId(null);
+            setDeleting(false);
+            setPendingDelete(null);
         }
     };
 
-    // Estado derivado: se calcula directamente en render sin duplicar datos en un useState
-    const vehiculosFiltrados = clienteFiltro
-        ? vehiculos.filter((v) => v.clienteId === Number(clienteFiltro))
-        : vehiculos;
+    const handleSaved = (saved: Vehiculo, mode: 'create' | 'edit') => {
+        setVehiculos((prev) =>
+            mode === 'create' ? [...prev, saved] : prev.map((item) => (item.vehiculoId === saved.vehiculoId ? saved : item))
+        );
+        setEditingVehiculo(null);
+        setMostrarForm(false);
+    };
 
     return (
         <section>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <div>
-                    <h2 style={{ margin: 0, color: '#0f172a' }}>Gestión de Vehículos (Refactorizado con Custom Hooks)</h2>
+                    <h2 style={{ margin: 0, color: '#0f172a' }}>Gestión de Vehículos (UI Compartida & Filtros)</h2>
                     <p style={{ margin: '0.25rem 0 0', color: '#64748b', fontSize: '0.875rem' }}>
-                        Listado controlado mediante `useVehiculos` ({vehiculos.length} registrados)
+                        Listado compuesto con filtros por cliente y tipo ({vehiculosFiltrados.length} encontrados)
                     </p>
                 </div>
-                <button
+                <Button
                     onClick={() => {
                         setEditingVehiculo(null);
                         setMostrarForm((prev) => !prev);
                     }}
-                    style={{ padding: '0.5rem 1rem', backgroundColor: '#2563eb', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
                 >
                     {mostrarForm ? '✕ Cerrar Formulario' : '+ Nuevo Vehículo'}
-                </button>
+                </Button>
             </div>
 
-            <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155' }}>Filtrar por Cliente:</label>
-                <select
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                <SearchInput value={search} onChange={setSearch} placeholder="Buscar por placa, marca, propietario..." />
+
+                <SelectFilter
+                    label="Cliente"
                     value={clienteFiltro}
-                    onChange={(e) => setClienteFiltro(e.target.value)}
-                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#fff' }}
-                >
-                    <option value="">-- Todos los Clientes --</option>
-                    {clientes.map((c) => (
-                        <option key={c.clienteId} value={c.clienteId}>
-                            {c.nombreCompleto} (#{c.clienteId})
-                        </option>
-                    ))}
-                </select>
+                    onChange={setClienteFiltro}
+                    options={[
+                        { value: '', label: '-- Todos los Clientes --' },
+                        ...clientes.map((c) => ({ value: String(c.clienteId), label: c.nombreCompleto })),
+                    ]}
+                />
+
+                <SelectFilter
+                    label="Tipo"
+                    value={tipoFiltro}
+                    onChange={setTipoFiltro}
+                    options={[
+                        { value: '', label: '-- Todos los Tipos --' },
+                        { value: 'AUTO', label: 'AUTO' },
+                        { value: 'MOTO', label: 'MOTO' },
+                        { value: 'CAMIONETA', label: 'CAMIONETA' },
+                        { value: 'SUV', label: 'SUV' },
+                    ]}
+                />
             </div>
 
-            {loadingDetail && <div style={{ padding: '0.75rem', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '6px', marginBottom: '1rem' }}>Cargando detalle del vehículo...</div>}
             {error && <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: '#991b1b', borderRadius: '6px', marginBottom: '1rem' }}>{error}</div>}
 
             {mostrarForm && (
@@ -120,16 +158,24 @@ export default function VehiculosPage() {
             )}
 
             {loading ? (
-                <div style={{ padding: '1.5rem', textAlign: 'center', color: '#64748b' }}>Cargando datos...</div>
+                <div style={{ padding: '1.5rem', textAlign: 'center', color: '#64748b' }}>Cargando vehículos...</div>
+            ) : visibleVehiculos.length === 0 ? (
+                <EmptyState title="No se encontraron vehículos" description="Ajusta los filtros seleccionados para ver más resultados." />
             ) : (
-                <VehiculoTable
-                    vehiculos={vehiculosFiltrados}
-                    clientes={clientes}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    deletingId={deletingId}
-                />
+                <>
+                    <VehiculoTable vehiculos={visibleVehiculos} clientes={clientes} onEdit={handleEdit} onDelete={(v) => setPendingDelete(v)} />
+                    <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+                </>
             )}
+
+            <ConfirmDialog
+                open={pendingDelete != null}
+                title="Confirmar Eliminación"
+                message={`¿Está seguro de eliminar el vehículo con placa "${pendingDelete?.placa}"?`}
+                loading={deleting}
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setPendingDelete(null)}
+            />
         </section>
     );
 }
