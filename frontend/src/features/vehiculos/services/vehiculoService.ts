@@ -1,8 +1,8 @@
 import { apiFetch } from '../../../api/apiClient';
 import type { Vehiculo } from '../types/Vehiculo';
-import type { VehiculoFormData } from '../types/VehiculoFormData';
 
 export interface VehiculoPayload {
+// ... el resto del archivo se mantiene exactamente igual
     placa: string;
     tipo: string;
     marca?: string;
