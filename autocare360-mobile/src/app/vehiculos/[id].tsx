@@ -1,4 +1,4 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { EmptyState } from '../../components/EmptyState';
@@ -10,7 +10,8 @@ import { leerIdPositivo } from '../../utils/routeParams';
 export default function DetalleVehiculoScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { clientes, vehiculos, dispatch } = useParking();
+  const { clientes, vehiculos, eliminarVehiculo } = useParking();
+  const [eliminando, setEliminando] = useState(false);
   const vehiculoId = leerIdPositivo(id);
   const vehiculo = vehiculos.find((v) => v.id === vehiculoId);
 
@@ -39,9 +40,15 @@ export default function DetalleVehiculoScreen() {
         {
           text: 'Eliminar',
           style: 'destructive',
-          onPress: () => {
-            dispatch({ type: 'VEHICULO_ELIMINAR', payload: vehiculo.id });
-            router.replace('/vehiculos');
+          onPress: async () => {
+            setEliminando(true);
+            const ok = await eliminarVehiculo(vehiculo.id);
+            setEliminando(false);
+            if (ok) {
+              router.replace('/vehiculos');
+            } else {
+              Alert.alert('Error', 'No se pudo eliminar el vehículo.');
+            }
           },
         },
       ]
@@ -76,9 +83,12 @@ export default function DetalleVehiculoScreen() {
         <Pressable
           style={styles.botonEliminar}
           onPress={confirmarEliminacion}
+          disabled={eliminando}
           accessibilityRole="button"
         >
-          <Text style={styles.textoBotonBlanco}>🗑️ Eliminar</Text>
+          <Text style={styles.textoBotonBlanco}>
+            {eliminando ? 'Eliminando...' : '🗑️ Eliminar'}
+          </Text>
         </Pressable>
       </View>
 
@@ -95,7 +105,7 @@ export default function DetalleVehiculoScreen() {
         <EmptyState mensaje="Este vehículo no tiene un cliente válido asignado." />
       )}
 
-      <Text style={styles.pie}>Gestión de Vehículos con Context API y Reducer</Text>
+      <Text style={styles.pie}>Persistencia Asíncrona HTTP con Backend REST</Text>
     </ScrollView>
   );
 }

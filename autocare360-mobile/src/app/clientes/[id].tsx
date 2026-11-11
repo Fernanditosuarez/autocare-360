@@ -1,4 +1,4 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { EmptyState } from '../../components/EmptyState';
@@ -11,7 +11,8 @@ import { leerIdPositivo } from '../../utils/routeParams';
 export default function DetalleClienteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { clientes, vehiculos, dispatch } = useParking();
+  const { clientes, vehiculos, eliminarCliente } = useParking();
+  const [eliminando, setEliminando] = useState(false);
   const clienteId = leerIdPositivo(id);
   const cliente = clientes.find((c) => c.id === clienteId);
 
@@ -40,9 +41,15 @@ export default function DetalleClienteScreen() {
         {
           text: 'Eliminar',
           style: 'destructive',
-          onPress: () => {
-            dispatch({ type: 'CLIENTE_ELIMINAR', payload: cliente.id });
-            router.replace('/clientes');
+          onPress: async () => {
+            setEliminando(true);
+            const ok = await eliminarCliente(cliente.id);
+            setEliminando(false);
+            if (ok) {
+              router.replace('/clientes');
+            } else {
+              Alert.alert('Error', 'No se pudo eliminar el cliente.');
+            }
           },
         },
       ]
@@ -76,9 +83,12 @@ export default function DetalleClienteScreen() {
         <Pressable
           style={styles.botonEliminar}
           onPress={confirmarEliminacion}
+          disabled={eliminando}
           accessibilityRole="button"
         >
-          <Text style={styles.textoBotonBlanco}>🗑️ Eliminar</Text>
+          <Text style={styles.textoBotonBlanco}>
+            {eliminando ? 'Eliminando...' : '🗑️ Eliminar'}
+          </Text>
         </Pressable>
       </View>
 
@@ -98,7 +108,7 @@ export default function DetalleClienteScreen() {
         ))
       )}
 
-      <Text style={styles.pie}>Relación Cliente (1) — (N) Vehículo con Context API</Text>
+      <Text style={styles.pie}>Persistencia Asíncrona HTTP con Backend REST</Text>
     </ScrollView>
   );
 }

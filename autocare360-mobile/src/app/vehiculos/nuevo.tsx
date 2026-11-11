@@ -1,30 +1,33 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { Alert } from 'react-native';
 import { VehicleForm } from '../../components/VehicleForm';
 import { useParking } from '../../state/ParkingContext';
-import { siguienteId } from '../../state/parkingReducer';
 
 export default function NuevoVehiculoScreen() {
   const router = useRouter();
-  const { clientes, vehiculos, dispatch } = useParking();
+  const { clientes, crearVehiculo } = useParking();
+  const [guardando, setGuardando] = useState(false);
 
   return (
     <VehicleForm
       clientes={clientes}
-      textoBoton="Registrar vehículo"
-      alGuardar={(valor) => {
+      textoBoton={guardando ? 'Guardando en servidor...' : 'Registrar vehículo'}
+      alGuardar={async (valor) => {
         if (valor.clienteId === null) return;
-        dispatch({
-          type: 'VEHICULO_CREAR',
-          payload: {
-            id: siguienteId(vehiculos),
-            clienteId: valor.clienteId,
-            placa: valor.placa,
-            marca: valor.marca,
-            modelo: valor.modelo,
-          },
+        setGuardando(true);
+        const ok = await crearVehiculo({
+          clienteId: valor.clienteId,
+          placa: valor.placa,
+          marca: valor.marca,
+          modelo: valor.modelo,
         });
-        router.replace('/vehiculos');
+        setGuardando(false);
+        if (ok) {
+          router.replace('/vehiculos');
+        } else {
+          Alert.alert('Error', 'No se pudo registrar el vehículo.');
+        }
       }}
     />
   );

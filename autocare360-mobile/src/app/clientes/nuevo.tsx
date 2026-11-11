@@ -1,22 +1,26 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { Alert } from 'react-native';
 import { ClienteForm } from '../../components/ClienteForm';
 import { useParking } from '../../state/ParkingContext';
-import { siguienteId } from '../../state/parkingReducer';
 
 export default function NuevoClienteScreen() {
   const router = useRouter();
-  const { clientes, dispatch } = useParking();
+  const { crearCliente } = useParking();
+  const [guardando, setGuardando] = useState(false);
 
   return (
     <ClienteForm
-      textoBoton="Crear cliente"
-      alGuardar={(valor) => {
-        dispatch({
-          type: 'CLIENTE_CREAR',
-          payload: { id: siguienteId(clientes), ...valor },
-        });
-        router.replace('/clientes');
+      textoBoton={guardando ? 'Guardando en servidor...' : 'Crear cliente'}
+      alGuardar={async (valor) => {
+        setGuardando(true);
+        const ok = await crearCliente(valor);
+        setGuardando(false);
+        if (ok) {
+          router.replace('/clientes');
+        } else {
+          Alert.alert('Error', 'No se pudo registrar el cliente.');
+        }
       }}
     />
   );

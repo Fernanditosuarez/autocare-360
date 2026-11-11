@@ -1,6 +1,6 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { ClienteForm } from '../../../components/ClienteForm';
 import { useParking } from '../../../state/ParkingContext';
 import { PALETTE } from '../../../theme/palette';
@@ -9,7 +9,8 @@ import { leerIdPositivo } from '../../../utils/routeParams';
 export default function EditarClienteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { clientes, dispatch } = useParking();
+  const { clientes, editarCliente } = useParking();
+  const [guardando, setGuardando] = useState(false);
   const clienteId = leerIdPositivo(id);
   const cliente = clientes.find((c) => c.id === clienteId);
 
@@ -28,16 +29,19 @@ export default function EditarClienteScreen() {
         correo: cliente.correo,
         activo: cliente.activo,
       }}
-      textoBoton="Guardar cambios"
-      alGuardar={(valor) => {
-        dispatch({
-          type: 'CLIENTE_EDITAR',
-          payload: { id: cliente.id, ...valor },
-        });
-        router.replace({
-          pathname: '/clientes/[id]',
-          params: { id: String(cliente.id) },
-        });
+      textoBoton={guardando ? 'Guardando cambios...' : 'Guardar cambios'}
+      alGuardar={async (valor) => {
+        setGuardando(true);
+        const ok = await editarCliente(cliente.id, valor);
+        setGuardando(false);
+        if (ok) {
+          router.replace({
+            pathname: '/clientes/[id]',
+            params: { id: String(cliente.id) },
+          });
+        } else {
+          Alert.alert('Error', 'No se pudo actualizar el cliente.');
+        }
       }}
     />
   );

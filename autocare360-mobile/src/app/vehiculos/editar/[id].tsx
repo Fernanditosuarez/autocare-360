@@ -1,6 +1,6 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { VehicleForm } from '../../../components/VehicleForm';
 import { useParking } from '../../../state/ParkingContext';
 import { PALETTE } from '../../../theme/palette';
@@ -9,7 +9,8 @@ import { leerIdPositivo } from '../../../utils/routeParams';
 export default function EditarVehiculoScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { clientes, vehiculos, dispatch } = useParking();
+  const { clientes, vehiculos, editarVehiculo } = useParking();
+  const [guardando, setGuardando] = useState(false);
   const vehiculoId = leerIdPositivo(id);
   const vehiculo = vehiculos.find((v) => v.id === vehiculoId);
 
@@ -30,23 +31,25 @@ export default function EditarVehiculoScreen() {
         marca: vehiculo.marca,
         modelo: vehiculo.modelo,
       }}
-      textoBoton="Guardar cambios"
-      alGuardar={(valor) => {
+      textoBoton={guardando ? 'Guardando cambios...' : 'Guardar cambios'}
+      alGuardar={async (valor) => {
         if (valor.clienteId === null) return;
-        dispatch({
-          type: 'VEHICULO_EDITAR',
-          payload: {
-            id: vehiculo.id,
-            clienteId: valor.clienteId,
-            placa: valor.placa,
-            marca: valor.marca,
-            modelo: valor.modelo,
-          },
+        setGuardando(true);
+        const ok = await editarVehiculo(vehiculo.id, {
+          clienteId: valor.clienteId,
+          placa: valor.placa,
+          marca: valor.marca,
+          modelo: valor.modelo,
         });
-        router.replace({
-          pathname: '/vehiculos/[id]',
-          params: { id: String(vehiculo.id) },
-        });
+        setGuardando(false);
+        if (ok) {
+          router.replace({
+            pathname: '/vehiculos/[id]',
+            params: { id: String(vehiculo.id) },
+          });
+        } else {
+          Alert.alert('Error', 'No se pudo actualizar el vehículo.');
+        }
       }}
     />
   );

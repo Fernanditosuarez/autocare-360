@@ -1,10 +1,12 @@
 ﻿import type { Cliente, Vehiculo } from '../models/parking';
 
-// En emulador Android, 10.0.2.2 apunta al localhost de tu computadora
-export const API_URL = '[suspicious link removed]';
+const PROTOCOLO = 'http';
+const HOST = '10.0.2.2:8080';
+export const API_URL = `${PROTOCOLO}://${HOST}/api`;
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_URL}${endpoint}`, {
+  const urlCompleta = `${API_URL}${endpoint}`;
+  const res = await fetch(urlCompleta, {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
