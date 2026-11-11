@@ -1,0 +1,28 @@
+﻿import React from 'react';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { PALETTE } from '../theme/palette';
+
+export default function RootLayout() {
+  return (
+    <>
+      <StatusBar style="light" />
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: PALETTE.principal },
+          headerTintColor: PALETTE.superficie,
+          headerTitleStyle: { fontWeight: 'bold' },
+          contentStyle: { backgroundColor: PALETTE.fondo },
+        }}
+      >
+        <Stack.Screen name="index" options={{ title: 'AutoCare 360' }} />
+        <Stack.Screen name="clientes/index" options={{ title: 'Clientes' }} />
+        <Stack.Screen name="clientes/[id]" options={{ title: 'Detalle del Cliente' }} />
+        <Stack.Screen name="vehiculos/index" options={{ title: 'Vehículos' }} />
+        <Stack.Screen name="vehiculos/[id]" options={{ title: 'Detalle del Vehículo' }} />
+        <Stack.Screen name="ayuda" options={{ title: 'Acerca de la Práctica' }} />
+        <Stack.Screen name="+not-found" options={{ title: 'Ruta Desconocida' }} />
+      </Stack>
+    </>
+  );
+}
