@@ -1,5 +1,6 @@
 ﻿import React from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Link } from 'expo-router';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { VehiculoNavegable } from '../../components/VehiculoNavegable';
 import { CLIENTES, VEHICULOS } from '../../data/demoData';
 import { PALETTE } from '../../theme/palette';
@@ -8,27 +9,31 @@ export default function VehiculosScreen() {
   return (
     <FlatList
       data={VEHICULOS}
-      keyExtractor={(vehiculo) => String(vehiculo.id)}
+      keyExtractor={(v) => String(v.id)}
       contentContainerStyle={styles.contenido}
       ListHeaderComponent={
-        <View style={styles.encabezado}>
-          <Text style={styles.titulo}>Todos los vehículos</Text>
+        <View>
+          <Text style={styles.titulo}>Vehículos (demostración)</Text>
           <Text style={styles.ayuda}>
-            Toca una tarjeta para navegar al detalle individual del vehículo.
+            Guía 04: primero validaremos el formulario, después guardaremos.
           </Text>
+          <Link href="/vehiculos/nuevo" asChild>
+            <Pressable style={styles.boton} accessibilityRole="link">
+              <Text style={styles.botonTexto}>+ Formulario nuevo vehículo</Text>
+            </Pressable>
+          </Link>
         </View>
       }
-      renderItem={({ item }) => {
-        const propietario = CLIENTES.find((c) => c.id === item.clienteId);
-        return (
-          <VehiculoNavegable
-            vehiculo={item}
-            nombreCliente={propietario?.nombre ?? 'Cliente no encontrado'}
-          />
-        );
-      }}
+      renderItem={({ item }) => (
+        <VehiculoNavegable
+          vehiculo={item}
+          nombreCliente={
+            CLIENTES.find((c) => c.id === item.clienteId)?.nombre ?? 'Sin cliente'
+          }
+        />
+      )}
       ListFooterComponent={
-        <Text style={styles.pie}>Catálogo general de automotores en taller</Text>
+        <Text style={styles.ayuda}>Los 5 vehículos todavía son datos locales.</Text>
       }
     />
   );
@@ -36,8 +41,8 @@ export default function VehiculosScreen() {
 
 const styles = StyleSheet.create({
   contenido: { padding: 18, paddingBottom: 35 },
-  encabezado: { marginBottom: 14 },
   titulo: { fontSize: 23, fontWeight: '800', color: PALETTE.principal },
-  ayuda: { marginTop: 6, color: PALETTE.secundario, lineHeight: 20 },
-  pie: { color: PALETTE.acento, textAlign: 'center', marginTop: 14, fontSize: 12 },
+  ayuda: { marginTop: 10, marginBottom: 12, color: PALETTE.secundario, lineHeight: 21 },
+  boton: { marginVertical: 13, padding: 14, backgroundColor: PALETTE.acento, borderRadius: 12 },
+  botonTexto: { color: '#FFFFFF', fontWeight: '800', textAlign: 'center' },
 });
