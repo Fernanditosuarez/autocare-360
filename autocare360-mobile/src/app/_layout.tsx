@@ -23,6 +23,7 @@ export default function RootLayout() {
         <Stack.Screen name="clientes/[id]" options={{ title: 'Detalle del Cliente' }} />
         <Stack.Screen name="vehiculos/index" options={{ title: 'Vehículos' }} />
         <Stack.Screen name="vehiculos/nuevo" options={{ title: 'Nuevo vehículo' }} />
+        <Stack.Screen name="vehiculos/editar/[id]" options={{ title: 'Editar vehículo' }} />
         <Stack.Screen name="vehiculos/[id]" options={{ title: 'Detalle del Vehículo' }} />
         <Stack.Screen name="ayuda" options={{ title: 'Acerca de la Práctica' }} />
         <Stack.Screen name="+not-found" options={{ title: 'Ruta Desconocida' }} />

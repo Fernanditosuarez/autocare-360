@@ -1,17 +1,30 @@
 ﻿import React from 'react';
-import { Alert } from 'react-native';
+import { useRouter } from 'expo-router';
 import { VehicleForm } from '../../components/VehicleForm';
-import { CLIENTES } from '../../data/demoData';
+import { useParking } from '../../state/ParkingContext';
+import { siguienteId } from '../../state/parkingReducer';
 
 export default function NuevoVehiculoScreen() {
+  const router = useRouter();
+  const { clientes, vehiculos, dispatch } = useParking();
+
   return (
     <VehicleForm
-      clientes={CLIENTES}
+      clientes={clientes}
+      textoBoton="Registrar vehículo"
       alGuardar={(valor) => {
-        Alert.alert(
-          'Formulario correcto (sin guardar)',
-          `Cliente ID: ${valor.clienteId}\nPlaca: ${valor.placa}\nMarca: ${valor.marca}\nModelo: ${valor.modelo}`
-        );
+        if (valor.clienteId === null) return;
+        dispatch({
+          type: 'VEHICULO_CREAR',
+          payload: {
+            id: siguienteId(vehiculos),
+            clienteId: valor.clienteId,
+            placa: valor.placa,
+            marca: valor.marca,
+            modelo: valor.modelo,
+          },
+        });
+        router.replace('/vehiculos');
       }}
     />
   );
