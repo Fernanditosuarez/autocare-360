@@ -7,6 +7,7 @@ export type ParkingState = {
 };
 
 export type ParkingAction =
+  | { type: 'CARGAR_DATOS_BACKEND'; payload: { clientes: Cliente[]; vehiculos: Vehiculo[] } }
   | { type: 'CLIENTE_CREAR'; payload: Cliente }
   | { type: 'CLIENTE_EDITAR'; payload: Cliente }
   | { type: 'CLIENTE_ELIMINAR'; payload: number }
@@ -25,6 +26,12 @@ export function siguienteId(lista: readonly { id: number }[]): number {
 
 export function parkingReducer(state: ParkingState, action: ParkingAction): ParkingState {
   switch (action.type) {
+    case 'CARGAR_DATOS_BACKEND':
+      return {
+        ...state,
+        clientes: action.payload.clientes,
+        vehiculos: action.payload.vehiculos,
+      };
     case 'CLIENTE_CREAR':
       return { ...state, clientes: [...state.clientes, action.payload] };
     case 'CLIENTE_EDITAR':
