@@ -1,106 +1,181 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   SafeAreaProvider,
   SafeAreaView,
 } from 'react-native-safe-area-context';
 
-type Seccion = 'clientes' | 'vehiculos';
+import { ClienteCard } from './src/components/ClienteCard';
+import { EmptyState } from './src/components/EmptyState';
+import { MetricCard } from './src/components/MetricCard';
+import { TabSelector } from './src/components/TabSelector';
+import { VehiculoCard } from './src/components/VehiculoCard';
+import { CLIENTES, VEHICULOS } from './src/data/demoData';
+import type { Seccion } from './src/models/parking';
+import { PALETTE } from './src/theme/palette';
 
 export default function App() {
   const [seccion, setSeccion] = useState<Seccion>('clientes');
-  const esClientes = seccion === 'clientes';
+  const [clienteId, setClienteId] = useState<number | null>(null);
+
+  // Estado Derivado
+  const clienteElegido = CLIENTES.find((c) => c.id === clienteId) ?? null;
+  const vehiculosElegidos = clienteElegido
+    ? VEHICULOS.filter((v) => v.clienteId === clienteElegido.id)
+    : [];
 
   return (
-      <SafeAreaProvider>
-        <SafeAreaView style={styles.pantalla} edges={['top', 'bottom']}>
-          <StatusBar style="dark" />
-          <ScrollView contentContainerStyle={styles.contenido}>
-            <Text style={styles.etiqueta}>PROGRAMACIÓN APLICADA · MÓVIL</Text>
-            <Text style={styles.titulo}>AutoCare 360</Text>
-            <Text style={styles.subtitulo}>
-              "Primera aplicación móvil de Fernando con React Native y Expo."            </Text>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.pantalla} edges={['top', 'bottom']}>
+        <StatusBar style="dark" />
+        <ScrollView contentContainerStyle={styles.contenido}>
+          <Text style={styles.etiqueta}>PROGRAMACIÓN APLICADA · MÓVIL</Text>
+          <Text style={styles.titulo}>AutoCare 360</Text>
+          <Text style={styles.subtitulo}>
+            Guía 02: Arquitectura modular, componentes, props y estado local.
+          </Text>
 
-            {/* Tarjetas de Indicadores */}
-            <View style={styles.filaIndicadores}>
-              <View style={styles.indicador}>
-                <Text style={styles.numero}>0</Text>
-                <Text style={styles.indicadorTexto}>Clientes Registrados</Text>
-              </View>
-              <View style={styles.indicador}>
-                <Text style={styles.numero}>0</Text>
-                <Text style={styles.indicadorTexto}>Vehículos Ingresados</Text>
-              </View>
-            </View>
+          {/* Métricas Generales */}
+          <View style={styles.indicadores}>
+            <MetricCard etiqueta="Clientes registrados" valor={CLIENTES.length} />
+            <MetricCard etiqueta="Vehículos ingresados" valor={VEHICULOS.length} />
+          </View>
 
-            {/* Botones de Selección */}
-            <Text style={styles.seccionTitulo}>Explorar módulos</Text>
-            <View style={styles.filaBotones}>
-              <Pressable
-                  style={[styles.botonTab, esClientes && styles.botonActivo]}
-                  onPress={() => setSeccion('clientes')}
-              >
-                <Text style={[styles.botonTexto, esClientes && styles.textoActivo]}>
-                  Clientes
-                </Text>
-              </Pressable>
+          {/* Navegación por Secciones */}
+          <Text style={styles.seccionTitulo}>Explorar información</Text>
+          <TabSelector actual={seccion} alCambiar={setSeccion} />
 
-              <Pressable
-                  style={[styles.botonTab, !esClientes && styles.botonActivo]}
-                  onPress={() => setSeccion('vehiculos')}
-              >
-                <Text style={[styles.botonTexto, !esClientes && styles.textoActivo]}>
-                  Vehículos
-                </Text>
-              </Pressable>
-            </View>
-
-            {/* Panel Dinámico según Estado Local */}
-            <View style={styles.panelInfo}>
-              <Text style={styles.panelTitulo}>
-                {esClientes ? 'Módulo de Clientes' : 'Módulo de Vehículos'}
+          {/* Módulo de Clientes */}
+          {seccion === 'clientes' ? (
+            <View style={styles.grupo}>
+              <Text style={styles.ayuda}>
+                Toca un cliente para ver sus vehículos en el taller:
               </Text>
-              <Text style={styles.panelDescripcion}>
-                {esClientes
-                    ? 'Gestión de propietarios de vehículos en el taller automotriz.'
-                    : 'Control de automotores por placa, tipo, marca y modelo.'}
-              </Text>
-            </View>
+              {CLIENTES.map((cliente) => (
+                <ClienteCard
+                  key={cliente.id}
+                  cliente={cliente}
+                  cantidadVehiculos={
+                    VEHICULOS.filter((v) => v.clienteId === cliente.id).length
+                  }
+                  seleccionado={clienteId === cliente.id}
+                  alSeleccionar={() => setClienteId(cliente.id)}
+                />
+              ))}
 
-            <Text style={styles.pie}>
-              Guía 01 · Estado local interactivo en React Native
-            </Text>
-          </ScrollView>
-        </SafeAreaView>
-      </SafeAreaProvider>
+              {/* Panel de Detalle del Cliente Seleccionado */}
+              {clienteElegido && (
+                <View style={styles.panelDetalle}>
+                  <Text style={styles.panelTitulo}>
+                    Vehículos de {clienteElegido.nombre}
+                  </Text>
+                  {vehiculosElegidos.length === 0 ? (
+                    <EmptyState mensaje="Este cliente no tiene vehículos de prueba registrados." />
+                  ) : (
+                    vehiculosElegidos.map((vehiculo) => (
+                      <VehiculoCard
+                        key={vehiculo.id}
+                        vehiculo={vehiculo}
+                        nombreCliente={clienteElegido.nombre}
+                      />
+                    ))
+                  )}
+                </View>
+              )}
+            </View>
+          ) : (
+            /* Módulo de Vehículos Completo */
+            <View style={styles.grupo}>
+              <Text style={styles.ayuda}>
+                Catálogo completo de vehículos en el taller:
+              </Text>
+              {VEHICULOS.map((vehiculo) => {
+                const propietario = CLIENTES.find(
+                  (c) => c.id === vehiculo.clienteId
+                );
+                return (
+                  <VehiculoCard
+                    key={vehiculo.id}
+                    vehiculo={vehiculo}
+                    nombreCliente={propietario?.nombre ?? 'Cliente no encontrado'}
+                  />
+                );
+              })}
+            </View>
+          )}
+
+          <Text style={styles.pie}>
+            Relación Cliente (1) — (N) Vehículo en React Native
+          </Text>
+        </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  pantalla: { flex: 1, backgroundColor: '#F8FAFC' },
-  contenido: { padding: 20, paddingBottom: 40 },
-  etiqueta: { fontSize: 11, fontWeight: '800', color: '#2563EB', letterSpacing: 1 },
-  titulo: { fontSize: 28, fontWeight: '800', color: '#0F172A', marginTop: 4 },
-  subtitulo: { fontSize: 14, color: '#64748B', marginTop: 4, marginBottom: 20 },
-  filaIndicadores: { flexDirection: 'row', gap: 12, marginBottom: 24 },
-  indicador: { flex: 1, backgroundColor: '#FFFFFF', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#E2E8F0', alignItems: 'center' },
-  numero: { fontSize: 28, fontWeight: '800', color: '#0F172A' },
-  indicadorTexto: { fontSize: 12, color: '#64748B', marginTop: 4, fontWeight: '500' },
-  seccionTitulo: { fontSize: 16, fontWeight: '700', color: '#0F172A', marginBottom: 12 },
-  filaBotones: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  botonTab: { flex: 1, paddingVertical: 12, backgroundColor: '#E2E8F0', borderRadius: 8, alignItems: 'center' },
-  botonActivo: { backgroundColor: '#2563EB' },
-  botonTexto: { fontSize: 14, fontWeight: '700', color: '#475569' },
-  textoActivo: { color: '#FFFFFF' },
-  panelInfo: { backgroundColor: '#FFFFFF', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#CBD5E1', marginTop: 8 },
-  panelTitulo: { fontSize: 16, fontWeight: '700', color: '#0F172A', marginBottom: 6 },
-  panelDescripcion: { fontSize: 13, color: '#64748B', lineHeight: 18 },
-  pie: { textAlign: 'center', fontSize: 12, color: '#94A3B8', marginTop: 32 },
+  pantalla: {
+    flex: 1,
+    backgroundColor: PALETTE.fondo,
+  },
+  contenido: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  etiqueta: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: PALETTE.acento,
+    letterSpacing: 1,
+  },
+  titulo: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: PALETTE.principal,
+    marginTop: 4,
+  },
+  subtitulo: {
+    fontSize: 14,
+    color: PALETTE.secundario,
+    marginTop: 4,
+    marginBottom: 20,
+  },
+  indicadores: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+  seccionTitulo: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: PALETTE.principal,
+    marginBottom: 12,
+  },
+  grupo: {
+    marginTop: 4,
+  },
+  ayuda: {
+    fontSize: 13,
+    color: PALETTE.secundario,
+    marginBottom: 12,
+  },
+  panelDetalle: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: PALETTE.borde,
+  },
+  panelTitulo: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: PALETTE.principal,
+    marginBottom: 12,
+  },
+  pie: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: PALETTE.secundario,
+    marginTop: 32,
+  },
 });
