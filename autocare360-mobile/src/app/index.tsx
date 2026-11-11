@@ -2,21 +2,23 @@
 import { Link } from 'expo-router';
 import { ScrollView, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MetricCard } from '../components/MetricCard';
-import { CLIENTES, VEHICULOS } from '../data/demoData';
+import { useParking } from '../state/ParkingContext';
 import { PALETTE } from '../theme/palette';
 
 export default function InicioScreen() {
+  const { clientes, vehiculos } = useParking();
+
   return (
     <ScrollView contentContainerStyle={styles.contenido}>
-      <Text style={styles.etiqueta}>PROGRAMACIÓN APLICADA · GUÍA 03</Text>
+      <Text style={styles.etiqueta}>PROGRAMACIÓN APLICADA · GUÍA 05</Text>
       <Text style={styles.titulo}>AutoCare 360 Mobile</Text>
       <Text style={styles.descripcion}>
-        Navegación profesional entre pantallas con Expo Router y TypeScript.
+        Estado compartido local y CRUD en memoria con React Context API y Reducer.
       </Text>
 
       <View style={styles.metricas}>
-        <MetricCard etiqueta="Clientes" valor={CLIENTES.length} />
-        <MetricCard etiqueta="Vehículos" valor={VEHICULOS.length} />
+        <MetricCard etiqueta="Clientes" valor={clientes.length} />
+        <MetricCard etiqueta="Vehículos" valor={vehiculos.length} />
       </View>
 
       <Text style={styles.subtitulo}>¿Dónde quieres entrar?</Text>
@@ -24,7 +26,7 @@ export default function InicioScreen() {
       <Link href="/clientes" asChild>
         <Pressable style={styles.boton} accessibilityRole="link">
           <Text style={styles.botonTitulo}>Explorar Clientes →</Text>
-          <Text style={styles.botonSub}>Ver lista de clientes y sus vehículos asociados</Text>
+          <Text style={styles.botonSub}>Gestionar alta, edición y baja de clientes</Text>
         </Pressable>
       </Link>
 
@@ -42,7 +44,7 @@ export default function InicioScreen() {
       </Link>
 
       <Text style={styles.aviso}>
-        Datos locales de demostración: navegación con rutas y parámetros.
+        Los cambios en la interfaz se conservan en memoria mientras la app siga activa.
       </Text>
     </ScrollView>
   );
