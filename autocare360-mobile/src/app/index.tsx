@@ -1,23 +1,47 @@
 ﻿import React from 'react';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MetricCard } from '../components/MetricCard';
+import { useAuth } from '../state/AuthContext';
 import { useParking } from '../state/ParkingContext';
 import { PALETTE } from '../theme/palette';
 
 export default function InicioScreen() {
+  const router = useRouter();
+  const { token, usuario, cerrarSesion } = useAuth();
   const { clientes, vehiculos, cargando, error, sincronizarConBackend } = useParking();
 
   const clientesActivos = clientes.filter((c) => c.activo).length;
-  const promedioVehiculos = clientes.length > 0 ? (vehiculos.length / clientes.length).toFixed(1) : '0';
+  const promedioVehiculos = clientes.length > 0 ? Number((vehiculos.length / clientes.length).toFixed(1)) : 0;
 
   return (
     <ScrollView contentContainerStyle={styles.contenido}>
-      <Text style={styles.etiqueta}>PROGRAMACIÓN APLICADA · GUÍA 10 FINAL</Text>
+      <Text style={styles.etiqueta}>PROGRAMACIÓN APLICADA · GUÍA 12</Text>
       <Text style={styles.titulo}>AutoCare 360 Mobile</Text>
       <Text style={styles.descripcion}>
-        Dashboard ejecutivo, estado en tiempo real e integración Fullstack con Spring Boot + PostgreSQL.
+        Caché local SQLite, sincronización offline y persistencia relacional nativa.
       </Text>
+
+      {/* Banner de Estado de Autenticación */}
+      <View style={styles.bannerAuth}>
+        <View style={styles.infoAuth}>
+          <Text style={styles.tituloAuth}>
+            {token ? `🔐 Sesión Activa: ${usuario}` : '🔒 Sesión no iniciada'}
+          </Text>
+          <Text style={styles.subAuth}>
+            {token ? 'Token JWT almacenado en SecureStore' : 'Inicia sesión para autorizar peticiones REST'}
+          </Text>
+        </View>
+        {token ? (
+          <Pressable style={styles.botonAuthMini} onPress={cerrarSesion}>
+            <Text style={styles.textoAuthMini}>Salir</Text>
+          </Pressable>
+        ) : (
+          <Pressable style={styles.botonAuthMiniAcento} onPress={() => router.push('/login')}>
+            <Text style={styles.textoAuthMiniBlanco}>Login</Text>
+          </Pressable>
+        )}
+      </View>
 
       {/* Banner de Estado de Red / Servidor */}
       {cargando ? (
@@ -63,6 +87,13 @@ export default function InicioScreen() {
         </Pressable>
       </Link>
 
+      <Link href="/offline" asChild>
+        <Pressable style={styles.boton} accessibilityRole="link">
+          <Text style={styles.botonTitulo}>💾 Caché SQLite & Modo Offline →</Text>
+          <Text style={styles.botonSub}>Sincronización local en dispositivo y trabajo sin conexión</Text>
+        </Pressable>
+      </Link>
+
       <Link href="/ayuda" asChild>
         <Pressable style={styles.botonSuave} accessibilityRole="link">
           <Text style={styles.botonTitulo}>ℹ️ Acerca de la App & Arquitectura</Text>
@@ -77,6 +108,24 @@ const styles = StyleSheet.create({
   etiqueta: { fontSize: 11, fontWeight: '800', color: PALETTE.acento, letterSpacing: 1 },
   titulo: { fontSize: 28, fontWeight: '800', color: PALETTE.principal, marginTop: 4 },
   descripcion: { fontSize: 14, color: PALETTE.secundario, marginTop: 4, marginBottom: 16 },
+  bannerAuth: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: PALETTE.borde,
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 12,
+  },
+  infoAuth: { flex: 1, marginRight: 10 },
+  tituloAuth: { fontSize: 13, fontWeight: '800', color: PALETTE.principal },
+  subAuth: { fontSize: 11, color: PALETTE.secundario, marginTop: 2 },
+  botonAuthMini: { backgroundColor: PALETTE.fondo, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6 },
+  textoAuthMini: { color: PALETTE.principal, fontSize: 12, fontWeight: '700' },
+  botonAuthMiniAcento: { backgroundColor: PALETTE.acento, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6 },
+  textoAuthMiniBlanco: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
   bannerCarga: {
     flexDirection: 'row',
     alignItems: 'center',

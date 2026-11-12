@@ -1,18 +1,48 @@
-﻿import type { Cliente, Vehiculo } from '../models/parking';
+﻿import * as SecureStore from 'expo-secure-store';
+import type { Cliente, Vehiculo } from '../models/parking';
 
 const PROTOCOLO = 'http';
 const HOST = '10.0.2.2:8080';
 export const API_URL = `${PROTOCOLO}://${HOST}/api`;
 
+const TOKEN_KEY = 'autocare360_jwt_token';
+
+export async function obtenerTokenGuardado(): Promise<string | null> {
+  try {
+    return await SecureStore.getItemAsync(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export async function guardarToken(token: string): Promise<void> {
+  await SecureStore.setItemAsync(TOKEN_KEY, token);
+}
+
+export async function eliminarToken(): Promise<void> {
+  await SecureStore.deleteItemAsync(TOKEN_KEY);
+}
+
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const urlCompleta = `${API_URL}${endpoint}`;
-  const res = await fetch(urlCompleta, {
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
+  const token = await obtenerTokenGuardado();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    ...(options?.headers as Record<string, string>),
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_URL}${endpoint}`, {
     ...options,
+    headers,
   });
+
+  if (res.status === 401) {
+    throw new Error('401: No autorizado o token expirado');
+  }
 
   if (!res.ok) {
     throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
@@ -24,6 +54,16 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 
   return res.json();
 }
+
+export const authApi = {
+  login: async (correo: string, clave: string) => {
+    const res = await request<{ token: string; usuario: string }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ correo, clave }),
+    });
+    return res;
+  },
+};
 
 export const clienteApi = {
   obtenerTodos: () => request<Cliente[]>('/clientes'),

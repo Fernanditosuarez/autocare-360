@@ -10,11 +10,10 @@ export default function AyudaScreen() {
   return (
     <ScrollView contentContainerStyle={styles.contenido}>
       <ReturnButton destinoSiNoHayHistorial="/" />
-      <Text style={styles.etiqueta}>AUTO CARE 360 · PROYECTO MÓVIL FINAL</Text>
-      <Text style={styles.titulo}>Resumen e Integración Final</Text>
+      <Text style={styles.etiqueta}>AUTO CARE 360 · PROYECTO MÓVIL</Text>
+      <Text style={styles.titulo}>Resumen & Arquitectura</Text>
       <Text style={styles.descripcion}>
-        Aplicación móvil desarrollada con React Native, Expo Router, TypeScript y arquitectura híbrida
-        conectada a Spring Boot + PostgreSQL.
+        Aplicación móvil desarrollada con React Native, Expo Router, TypeScript, SQLite y Spring Boot.
       </Text>
 
       <View style={styles.seccion}>
@@ -38,6 +37,8 @@ export default function AyudaScreen() {
         <Text style={styles.texto}>✅ Guía 08: Persistencia REST completa (POST, PUT, DELETE)</Text>
         <Text style={styles.texto}>✅ Guía 09: Búsqueda en tiempo real, filtros y FlatList</Text>
         <Text style={styles.texto}>✅ Guía 10: Integración final, modales y Dashboard</Text>
+        <Text style={styles.texto}>✅ Guía 11: Autenticación JWT y SecureStore</Text>
+        <Text style={styles.texto}>✅ Guía 12: SQLite, caché local y trabajo sin conexión</Text>
       </View>
 
       <Text style={styles.pie}>AutoCare 360 · Solución Móvil Profesional 2026</Text>
