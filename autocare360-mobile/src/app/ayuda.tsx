@@ -40,6 +40,7 @@ export default function AyudaScreen() {
         <Text style={styles.texto}>✅ Guía 11: Autenticación JWT y SecureStore</Text>
         <Text style={styles.texto}>✅ Guía 12: SQLite, caché local y trabajo sin conexión</Text>
         <Text style={styles.texto}>✅ Guía 13: Cámara, galería, permisos nativos y subida de fotos</Text>
+        <Text style={styles.texto}>✅ Guía 14: Pruebas unitarias con Vitest, TypeScript y Expo Doctor</Text>
       </View>
 
       <Text style={styles.pie}>AutoCare 360 · Solución Móvil Profesional 2026</Text>

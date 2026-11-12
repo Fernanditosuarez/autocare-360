@@ -16,10 +16,10 @@ export default function InicioScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.contenido}>
-      <Text style={styles.etiqueta}>PROGRAMACIÓN APLICADA · GUÍA 13</Text>
+      <Text style={styles.etiqueta}>PROGRAMACIÓN APLICADA · GUÍA 14</Text>
       <Text style={styles.titulo}>AutoCare 360 Mobile</Text>
       <Text style={styles.descripcion}>
-        Cámara, galería, permisos nativos de Android y subida multipart de fotos de vehículos.
+        Pruebas automatizadas con Vitest, control de calidad TypeScript y diagnóstico Expo Doctor.
       </Text>
 
       {/* Banner de Estado de Autenticación */}
