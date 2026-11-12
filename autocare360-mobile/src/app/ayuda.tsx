@@ -13,7 +13,7 @@ export default function AyudaScreen() {
       <Text style={styles.etiqueta}>AUTO CARE 360 · PROYECTO MÓVIL</Text>
       <Text style={styles.titulo}>Resumen & Arquitectura</Text>
       <Text style={styles.descripcion}>
-        Aplicación móvil desarrollada con React Native, Expo Router, TypeScript, SQLite y Spring Boot.
+        Aplicación móvil desarrollada con React Native, Expo Router, TypeScript, SQLite, Cámara/Galería y Spring Boot.
       </Text>
 
       <View style={styles.seccion}>
@@ -39,6 +39,7 @@ export default function AyudaScreen() {
         <Text style={styles.texto}>✅ Guía 10: Integración final, modales y Dashboard</Text>
         <Text style={styles.texto}>✅ Guía 11: Autenticación JWT y SecureStore</Text>
         <Text style={styles.texto}>✅ Guía 12: SQLite, caché local y trabajo sin conexión</Text>
+        <Text style={styles.texto}>✅ Guía 13: Cámara, galería, permisos nativos y subida de fotos</Text>
       </View>
 
       <Text style={styles.pie}>AutoCare 360 · Solución Móvil Profesional 2026</Text>

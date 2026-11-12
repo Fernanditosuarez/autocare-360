@@ -29,6 +29,7 @@ export default function RootLayout() {
           <Stack.Screen name="vehiculos/editar/[id]" options={{ title: 'Editar vehículo' }} />
           <Stack.Screen name="vehiculos/[id]" options={{ title: 'Detalle del Vehículo' }} />
           <Stack.Screen name="offline" options={{ title: 'Caché SQLite & Offline' }} />
+          <Stack.Screen name="fotos" options={{ title: 'Cámara & Subida de Fotos' }} />
           <Stack.Screen name="ayuda" options={{ title: 'Acerca de la Práctica' }} />
           <Stack.Screen name="+not-found" options={{ title: 'Ruta Desconocida' }} />
         </Stack>

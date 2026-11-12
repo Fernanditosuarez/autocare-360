@@ -16,10 +16,10 @@ export default function InicioScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.contenido}>
-      <Text style={styles.etiqueta}>PROGRAMACIÓN APLICADA · GUÍA 12</Text>
+      <Text style={styles.etiqueta}>PROGRAMACIÓN APLICADA · GUÍA 13</Text>
       <Text style={styles.titulo}>AutoCare 360 Mobile</Text>
       <Text style={styles.descripcion}>
-        Caché local SQLite, sincronización offline y persistencia relacional nativa.
+        Cámara, galería, permisos nativos de Android y subida multipart de fotos de vehículos.
       </Text>
 
       {/* Banner de Estado de Autenticación */}
@@ -84,6 +84,13 @@ export default function InicioScreen() {
         <Pressable style={styles.boton} accessibilityRole="link">
           <Text style={styles.botonTitulo}>🚘 Catálogo de Vehículos →</Text>
           <Text style={styles.botonSub}>Registro de automotores, propietario 1:N y filtros</Text>
+        </Pressable>
+      </Link>
+
+      <Link href="/fotos" asChild>
+        <Pressable style={styles.boton} accessibilityRole="link">
+          <Text style={styles.botonTitulo}>📸 Cámara & Subida de Fotos →</Text>
+          <Text style={styles.botonSub}>Captura con la cámara, permisos nativos y galería</Text>
         </Pressable>
       </Link>
 
