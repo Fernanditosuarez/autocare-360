@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ConfirmModal } from '../../components/ConfirmModal';
 import { EmptyState } from '../../components/EmptyState';
 import { ReturnButton } from '../../components/ReturnButton';
 import { useParking } from '../../state/ParkingContext';
@@ -12,6 +13,8 @@ export default function DetalleVehiculoScreen() {
   const router = useRouter();
   const { clientes, vehiculos, eliminarVehiculo } = useParking();
   const [eliminando, setEliminando] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
   const vehiculoId = leerIdPositivo(id);
   const vehiculo = vehiculos.find((v) => v.id === vehiculoId);
 
@@ -30,29 +33,17 @@ export default function DetalleVehiculoScreen() {
 
   const cliente = clientes.find((c) => c.id === vehiculo.clienteId);
 
-  function confirmarEliminacion() {
+  async function ejecutarEliminacion() {
     if (!vehiculo) return;
-    Alert.alert(
-      'Eliminar vehículo',
-      `¿Estás seguro de eliminar el vehículo con placa ${vehiculo.placa}?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            setEliminando(true);
-            const ok = await eliminarVehiculo(vehiculo.id);
-            setEliminando(false);
-            if (ok) {
-              router.replace('/vehiculos');
-            } else {
-              Alert.alert('Error', 'No se pudo eliminar el vehículo.');
-            }
-          },
-        },
-      ]
-    );
+    setEliminando(true);
+    const ok = await eliminarVehiculo(vehiculo.id);
+    setEliminando(false);
+    setModalVisible(false);
+    if (ok) {
+      router.replace('/vehiculos');
+    } else {
+      Alert.alert('Error', 'No se pudo eliminar el vehículo.');
+    }
   }
 
   return (
@@ -82,7 +73,7 @@ export default function DetalleVehiculoScreen() {
 
         <Pressable
           style={styles.botonEliminar}
-          onPress={confirmarEliminacion}
+          onPress={() => setModalVisible(true)}
           disabled={eliminando}
           accessibilityRole="button"
         >
@@ -106,6 +97,17 @@ export default function DetalleVehiculoScreen() {
       )}
 
       <Text style={styles.pie}>Persistencia Asíncrona HTTP con Backend REST</Text>
+
+      {/* Modal de Confirmación */}
+      <ConfirmModal
+        visible={modalVisible}
+        titulo="Eliminar Vehículo"
+        mensaje={`¿Estás seguro de eliminar el vehículo con placa ${vehiculo.placa}?`}
+        textoConfirmar="Sí, Eliminar"
+        cargando={eliminando}
+        alConfirmar={ejecutarEliminacion}
+        alCancelar={() => setModalVisible(false)}
+      />
     </ScrollView>
   );
 }

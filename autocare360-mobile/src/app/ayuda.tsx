@@ -1,49 +1,64 @@
 ﻿import React from 'react';
-import { Link } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ReturnButton } from '../components/ReturnButton';
+import { useParking } from '../state/ParkingContext';
 import { PALETTE } from '../theme/palette';
 
 export default function AyudaScreen() {
+  const { clientes, vehiculos, cargando, error } = useParking();
+
   return (
     <ScrollView contentContainerStyle={styles.contenido}>
       <ReturnButton destinoSiNoHayHistorial="/" />
-      <Text style={styles.titulo}>Acerca de la Guía 03</Text>
-      <Text style={styles.parrafo}>
-        En esta práctica transformamos la interfaz monolítica en un sistema de navegación
-        basado en archivos con Expo Router. Cada pantalla corresponde a un archivo en src/app/.
+      <Text style={styles.etiqueta}>AUTO CARE 360 · PROYECTO MÓVIL FINAL</Text>
+      <Text style={styles.titulo}>Resumen e Integración Final</Text>
+      <Text style={styles.descripcion}>
+        Aplicación móvil desarrollada con React Native, Expo Router, TypeScript y arquitectura híbrida
+        conectada a Spring Boot + PostgreSQL.
       </Text>
 
-      <Text style={styles.subtitulo}>Pruebas de rutas y manejo de errores</Text>
-      <Text style={styles.parrafo}>
-        Toca los botones para probar el comportamiento defensivo ante IDs inexistentes o mal formados:
-      </Text>
+      <View style={styles.seccion}>
+        <Text style={styles.subtitulo}>📱 Estado del Sistema</Text>
+        <Text style={styles.texto}>• Clientes registrados: {clientes.length}</Text>
+        <Text style={styles.texto}>• Vehículos registrados: {vehiculos.length}</Text>
+        <Text style={styles.texto}>
+          • Conexión HTTP: {cargando ? 'Cargando...' : error ? 'Modo Local (Sin backend)' : 'En línea (Spring Boot)'}
+        </Text>
+      </View>
 
-      <Link href={{ pathname: '/clientes/[id]', params: { id: '999' } }} asChild>
-        <Pressable style={styles.accion} accessibilityRole="link">
-          <Text style={styles.accionTexto}>🧪 Probar Cliente 999 (ID inexistente)</Text>
-        </Pressable>
-      </Link>
+      <View style={styles.seccion}>
+        <Text style={styles.subtitulo}>🎯 Guías de Desarrollo Implementadas</Text>
+        <Text style={styles.texto}>✅ Guía 01: Entorno, Expo y primera pantalla</Text>
+        <Text style={styles.texto}>✅ Guía 02: Componentes, props, estado y paleta</Text>
+        <Text style={styles.texto}>✅ Guía 03: Navegación por archivos (Expo Router)</Text>
+        <Text style={styles.texto}>✅ Guía 04: Formularios, entradas de datos y validaciones</Text>
+        <Text style={styles.texto}>✅ Guía 05: Estado compartido y CRUD de Clientes</Text>
+        <Text style={styles.texto}>✅ Guía 06: CRUD de Vehículos y relación 1:N</Text>
+        <Text style={styles.texto}>✅ Guía 07: Conexión HTTP asíncrona con fetch y useEffect</Text>
+        <Text style={styles.texto}>✅ Guía 08: Persistencia REST completa (POST, PUT, DELETE)</Text>
+        <Text style={styles.texto}>✅ Guía 09: Búsqueda en tiempo real, filtros y FlatList</Text>
+        <Text style={styles.texto}>✅ Guía 10: Integración final, modales y Dashboard</Text>
+      </View>
 
-      <Link href={{ pathname: '/vehiculos/[id]', params: { id: 'abc' } }} asChild>
-        <Pressable style={styles.accion} accessibilityRole="link">
-          <Text style={styles.accionTexto}>🧪 Probar Vehículo con ID inválido ("abc")</Text>
-        </Pressable>
-      </Link>
-
-      <Text style={styles.nota}>
-        Si los IDs no existen o no son numéricos, la app muestra un estado defensivo sin romperse.
-      </Text>
+      <Text style={styles.pie}>AutoCare 360 · Solución Móvil Profesional 2026</Text>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   contenido: { padding: 18, paddingBottom: 40 },
-  titulo: { marginTop: 8, fontSize: 23, fontWeight: '800', color: PALETTE.principal },
-  subtitulo: { marginTop: 20, fontSize: 16, fontWeight: '800', color: PALETTE.principal },
-  parrafo: { marginTop: 8, lineHeight: 22, color: PALETTE.secundario, fontSize: 14 },
-  accion: { backgroundColor: PALETTE.acentoClaro, borderRadius: 12, padding: 14, marginTop: 12 },
-  accionTexto: { textAlign: 'center', fontWeight: '700', color: PALETTE.principal },
-  nota: { marginTop: 18, lineHeight: 20, color: PALETTE.acento, fontSize: 12 },
+  etiqueta: { fontSize: 11, fontWeight: '800', color: PALETTE.acento, letterSpacing: 1 },
+  titulo: { fontSize: 25, fontWeight: '800', color: PALETTE.principal, marginTop: 4 },
+  descripcion: { fontSize: 14, color: PALETTE.secundario, marginTop: 6, marginBottom: 20, lineHeight: 20 },
+  seccion: {
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: PALETTE.borde,
+    marginBottom: 16,
+  },
+  subtitulo: { fontSize: 16, fontWeight: '800', color: PALETTE.principal, marginBottom: 10 },
+  texto: { fontSize: 13, color: PALETTE.secundario, marginBottom: 6, lineHeight: 18 },
+  pie: { textAlign: 'center', color: PALETTE.acento, marginTop: 20, fontSize: 12, fontWeight: '700' },
 });

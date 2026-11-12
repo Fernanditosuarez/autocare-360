@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ConfirmModal } from '../../components/ConfirmModal';
 import { EmptyState } from '../../components/EmptyState';
 import { ReturnButton } from '../../components/ReturnButton';
 import { VehiculoNavegable } from '../../components/VehiculoNavegable';
@@ -13,6 +14,8 @@ export default function DetalleClienteScreen() {
   const router = useRouter();
   const { clientes, vehiculos, eliminarCliente } = useParking();
   const [eliminando, setEliminando] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
   const clienteId = leerIdPositivo(id);
   const cliente = clientes.find((c) => c.id === clienteId);
 
@@ -31,29 +34,17 @@ export default function DetalleClienteScreen() {
 
   const vehiculosAsociados = vehiculos.filter((v) => v.clienteId === cliente.id);
 
-  function confirmarEliminacion() {
+  async function ejecutarEliminacion() {
     if (!cliente) return;
-    Alert.alert(
-      'Eliminar cliente',
-      `¿Estás seguro de eliminar a ${cliente.nombre}? También se eliminarán sus vehículos asociados.`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            setEliminando(true);
-            const ok = await eliminarCliente(cliente.id);
-            setEliminando(false);
-            if (ok) {
-              router.replace('/clientes');
-            } else {
-              Alert.alert('Error', 'No se pudo eliminar el cliente.');
-            }
-          },
-        },
-      ]
-    );
+    setEliminando(true);
+    const ok = await eliminarCliente(cliente.id);
+    setEliminando(false);
+    setModalVisible(false);
+    if (ok) {
+      router.replace('/clientes');
+    } else {
+      Alert.alert('Error', 'No se pudo eliminar el cliente.');
+    }
   }
 
   return (
@@ -82,7 +73,7 @@ export default function DetalleClienteScreen() {
 
         <Pressable
           style={styles.botonEliminar}
-          onPress={confirmarEliminacion}
+          onPress={() => setModalVisible(true)}
           disabled={eliminando}
           accessibilityRole="button"
         >
@@ -109,6 +100,17 @@ export default function DetalleClienteScreen() {
       )}
 
       <Text style={styles.pie}>Persistencia Asíncrona HTTP con Backend REST</Text>
+
+      {/* Modal de Confirmación */}
+      <ConfirmModal
+        visible={modalVisible}
+        titulo="Eliminar Cliente"
+        mensaje={`¿Estás seguro de eliminar a ${cliente.nombre}? También se eliminarán sus vehículos asociados.`}
+        textoConfirmar="Sí, Eliminar"
+        cargando={eliminando}
+        alConfirmar={ejecutarEliminacion}
+        alCancelar={() => setModalVisible(false)}
+      />
     </ScrollView>
   );
 }
