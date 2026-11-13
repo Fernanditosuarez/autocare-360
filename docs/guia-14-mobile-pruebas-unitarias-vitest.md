@@ -7,4 +7,4 @@
 ## 2. Diagnóstico de Salud y Control de Calidad
 - Ejecución limpia de `npx vitest run` (3 tests pasados).
 - Verificación estática estricta con `npx tsc --noEmit` (0 errores de tipos).
-- Auditoría de dependencias con `npx expo-doctor`.
+- Auditoría de dependencias con `npx expo-doctor` (19/20 checks).
