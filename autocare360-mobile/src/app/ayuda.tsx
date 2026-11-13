@@ -10,10 +10,10 @@ export default function AyudaScreen() {
   return (
     <ScrollView contentContainerStyle={styles.contenido}>
       <ReturnButton destinoSiNoHayHistorial="/" />
-      <Text style={styles.etiqueta}>AUTO CARE 360 · PROYECTO MÓVIL</Text>
+      <Text style={styles.etiqueta}>AUTO CARE 360 · PROYECTO MÓVIL FINAL</Text>
       <Text style={styles.titulo}>Resumen & Arquitectura</Text>
       <Text style={styles.descripcion}>
-        Aplicación móvil desarrollada con React Native, Expo Router, TypeScript, SQLite, Cámara/Galería y Spring Boot.
+        Solución móvil integral desarrollada con React Native, Expo Router, TypeScript, SQLite, Cámara/Galería, Vitest, JWT y Spring Boot.
       </Text>
 
       <View style={styles.seccion}>
@@ -26,7 +26,7 @@ export default function AyudaScreen() {
       </View>
 
       <View style={styles.seccion}>
-        <Text style={styles.subtitulo}>🎯 Guías de Desarrollo Implementadas</Text>
+        <Text style={styles.subtitulo}>🎯 15 Guías de Desarrollo Completadas</Text>
         <Text style={styles.texto}>✅ Guía 01: Entorno, Expo y primera pantalla</Text>
         <Text style={styles.texto}>✅ Guía 02: Componentes, props, estado y paleta</Text>
         <Text style={styles.texto}>✅ Guía 03: Navegación por archivos (Expo Router)</Text>
@@ -41,6 +41,7 @@ export default function AyudaScreen() {
         <Text style={styles.texto}>✅ Guía 12: SQLite, caché local y trabajo sin conexión</Text>
         <Text style={styles.texto}>✅ Guía 13: Cámara, galería, permisos nativos y subida de fotos</Text>
         <Text style={styles.texto}>✅ Guía 14: Pruebas unitarias con Vitest, TypeScript y Expo Doctor</Text>
+        <Text style={styles.texto}>✅ Guía 15: Perfiles de compilación EAS (APK/AAB) y graduación</Text>
       </View>
 
       <Text style={styles.pie}>AutoCare 360 · Solución Móvil Profesional 2026</Text>

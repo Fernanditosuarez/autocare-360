@@ -16,10 +16,10 @@ export default function InicioScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.contenido}>
-      <Text style={styles.etiqueta}>PROGRAMACIÓN APLICADA · GUÍA 14</Text>
+      <Text style={styles.etiqueta}>PROGRAMACIÓN APLICADA · GUÍA 15 FINAL</Text>
       <Text style={styles.titulo}>AutoCare 360 Mobile</Text>
       <Text style={styles.descripcion}>
-        Pruebas automatizadas con Vitest, control de calidad TypeScript y diagnóstico Expo Doctor.
+        Aplicación móvil profesional integrada con Spring Boot + PostgreSQL, SQLite y cámara nativa.
       </Text>
 
       {/* Banner de Estado de Autenticación */}
